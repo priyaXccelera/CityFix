@@ -1,6 +1,8 @@
 INSERT INTO users (id, name, email, password, role, address, phone, active, created_at)
-VALUES (1, 'Alice Super Admin', 'admin@cityfix.com', '$2b$10$.X158LDBfxqbk23MI62HjeyQSelKD/Kapo1U8UqM.Bc9NL5YbNLga', 'SUPER_ADMIN', 'Downtown', '555-0100', true, NOW())
-ON DUPLICATE KEY UPDATE role = 'SUPER_ADMIN', active = true;
+VALUES (1, 'Alice Super Admin', 'superadmin@cityfix.com', '$2b$10$0SVYBQFG/jj1dsGSanVQ9OI1QfUqCPI07qgFFvvxoOVYgbxARht1e', 'SUPER_ADMIN', 'Downtown', '555-0100', true, NOW())
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name), email = VALUES(email), password = VALUES(password), role = 'SUPER_ADMIN',
+  address = VALUES(address), phone = VALUES(phone), active = true;
 
 INSERT INTO users (id, name, email, password, role, address, phone, active, created_at)
 VALUES (2, 'Bob Reporter', 'bob@cityfix.com', '$2b$10$.X158LDBfxqbk23MI62HjeyQSelKD/Kapo1U8UqM.Bc9NL5YbNLga', 'USER', 'Downtown', '555-0101', true, NOW())

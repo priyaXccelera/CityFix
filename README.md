@@ -49,9 +49,9 @@ routing, discovery and any cross-cutting gateway config stay in one place.
 
 CityFix supports exactly three roles: `USER`, `ADMIN`, and `SUPER_ADMIN`.
 
-- A single `SUPER_ADMIN` is pre-seeded by `user-service` when its database is initialized. The
-  seed is idempotent, so subsequent application starts preserve that same account rather than
-  creating another one.
+- A single `SUPER_ADMIN` is pre-seeded by `user-service` when its database is initialized. Use
+  `superadmin@cityfix.com` with password `SuperAdmin@123` to log in. The seed is idempotent, so
+  subsequent application starts preserve that same account rather than creating another one.
 - Public registration always persists `role: USER`; the registration payload has no role field.
 - `SUPER_ADMIN` is the only role allowed to create `ADMIN` accounts. There is no endpoint or
   public workflow to create a `SUPER_ADMIN`, which preserves the single pre-seeded
