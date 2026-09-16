@@ -22,13 +22,13 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  @Operation(summary = "Register a new user (USER or ADMIN) and receive a JWT")
+  @Operation(summary = "PUBLIC: Register a new USER and receive a JWT")
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
     return ResponseEntity.ok(authService.register(request));
   }
 
   @PostMapping("/login")
-  @Operation(summary = "Login with email/password and receive a JWT")
+  @Operation(summary = "PUBLIC: Login and receive a JWT; response includes the exact USER, ADMIN, or SUPER_ADMIN role")
   public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
     return ResponseEntity.ok(authService.login(request));
   }

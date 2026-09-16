@@ -42,8 +42,10 @@ public class SecurityConfig {
                         "/swagger-ui/**",
                         "/v3/api-docs/**")
                     .permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/users/admins")
+                    .hasRole("SUPER_ADMIN")
                     .requestMatchers("/api/v1/users/**")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .anyRequest()
                     .authenticated())
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

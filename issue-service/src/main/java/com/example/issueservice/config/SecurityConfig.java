@@ -36,32 +36,32 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST, "/api/v1/departments")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.PUT, "/api/v1/departments/**")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.DELETE, "/api/v1/departments/**")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/categories")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.PUT, "/api/v1/categories/**")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.DELETE, "/api/v1/categories/**")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers("/api/v1/issues/analytics/**")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.PUT, "/api/v1/issues/*/assign")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.PUT, "/api/v1/issues/*/status")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.PUT, "/api/v1/issues/*/priority")
-                    .hasRole("ADMIN")
+                    .hasAnyRole("ADMIN", "SUPER_ADMIN")
                     .anyRequest()
                     .authenticated())
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class RegisterRequest {
+public class CreateAdminRequest {
 
   @NotBlank(message = "name is required")
   private String name;
@@ -16,10 +16,6 @@ public class RegisterRequest {
   @NotBlank(message = "password is required")
   @Size(min = 6, message = "password must be at least 6 characters")
   private String password;
-
-  private String address;
-
-  private String phone;
 
   public String getName() {
     return name;
@@ -43,21 +39,5 @@ public class RegisterRequest {
 
   public void setPassword(String password) {
     this.password = password;
-  }
-
-  public String getAddress() {
-    return address;
-  }
-
-  public void setAddress(String address) {
-    this.address = address;
-  }
-
-  public String getPhone() {
-    return phone;
-  }
-
-  public void setPhone(String phone) {
-    this.phone = phone;
   }
 }

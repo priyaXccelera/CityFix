@@ -56,7 +56,7 @@ class UserServiceTest {
     when(userRepository.findById(5L)).thenReturn(Optional.of(user));
     when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    UserResponse response = userService.deactivateUser(5L);
+    UserResponse response = userService.deactivateUser(5L, false);
 
     assertFalse(response.isActive());
     verify(userRepository).save(user);
@@ -66,6 +66,6 @@ class UserServiceTest {
   void deactivateUser_notFound_throwsResourceNotFound() {
     when(userRepository.findById(123L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () -> userService.deactivateUser(123L));
+    assertThrows(ResourceNotFoundException.class, () -> userService.deactivateUser(123L, false));
   }
 }
