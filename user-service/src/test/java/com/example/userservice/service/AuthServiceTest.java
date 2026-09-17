@@ -52,8 +52,33 @@ class AuthServiceTest {
   }
 
   @Test
-  void register_withValidData_savesUserAndReturnsToken() {
+  void register_withNoExistingUsers_createsSuperAdminAndReturnsToken() {
     when(userRepository.existsByEmail("test@cityfix.com")).thenReturn(false);
+    when(userRepository.count()).thenReturn(0L);
+    when(passwordEncoder.encode("Password123")).thenReturn("hashed-password");
+    when(userRepository.save(any(User.class)))
+        .thenAnswer(
+            invocation -> {
+              User u = invocation.getArgument(0);
+              u.setId(42L);
+              return u;
+            });
+    when(jwtUtil.generateToken(eq(42L), eq("test@cityfix.com"), eq("SUPER_ADMIN"), eq("Test User")))
+        .thenReturn("signed-jwt-token");
+    when(jwtUtil.getExpirationMs()).thenReturn(1800000L);
+
+    AuthResponse response = authService.register(registerRequest);
+
+    assertEquals("signed-jwt-token", response.getToken());
+    assertEquals(UserRole.SUPER_ADMIN, response.getUser().getRole());
+    assertEquals("test@cityfix.com", response.getUser().getEmail());
+    verify(userRepository).save(any(User.class));
+  }
+
+  @Test
+  void register_withExistingUsers_createsRegularUser() {
+    when(userRepository.existsByEmail("test@cityfix.com")).thenReturn(false);
+    when(userRepository.count()).thenReturn(1L);
     when(passwordEncoder.encode("Password123")).thenReturn("hashed-password");
     when(userRepository.save(any(User.class)))
         .thenAnswer(
@@ -68,9 +93,7 @@ class AuthServiceTest {
 
     AuthResponse response = authService.register(registerRequest);
 
-    assertEquals("signed-jwt-token", response.getToken());
     assertEquals(UserRole.USER, response.getUser().getRole());
-    assertEquals("test@cityfix.com", response.getUser().getEmail());
     verify(userRepository).save(any(User.class));
   }
 

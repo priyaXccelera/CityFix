@@ -31,6 +31,25 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.CREATED).body(userService.createAdmin(request));
   }
 
+  @GetMapping("/admins/pending")
+  @Operation(summary = "SUPER_ADMIN-ONLY: List pending ADMIN registration requests")
+  public ResponseEntity<Page<UserResponse>> listPendingAdmins(
+      @PageableDefault(size = 20) Pageable pageable) {
+    return ResponseEntity.ok(userService.listPendingAdmins(pageable));
+  }
+
+  @PutMapping("/admins/{id}/approve")
+  @Operation(summary = "SUPER_ADMIN-ONLY: Approve a pending ADMIN registration")
+  public ResponseEntity<UserResponse> approvePendingAdmin(@PathVariable Long id) {
+    return ResponseEntity.ok(userService.approvePendingAdmin(id));
+  }
+
+  @PutMapping("/admins/{id}/reject")
+  @Operation(summary = "SUPER_ADMIN-ONLY: Reject a pending ADMIN registration")
+  public ResponseEntity<UserResponse> rejectPendingAdmin(@PathVariable Long id) {
+    return ResponseEntity.ok(userService.rejectPendingAdmin(id));
+  }
+
   @GetMapping
   @Operation(summary = "ADMIN: List all users, paginated (ADMIN and SUPER_ADMIN)")
   public ResponseEntity<Page<UserResponse>> listUsers(

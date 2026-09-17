@@ -1,5 +1,6 @@
 package com.example.userservice.dto;
 
+import com.example.userservice.entity.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,8 @@ public class RegisterRequest {
   private String address;
 
   private String phone;
+
+  private UserRole requestedRole;
 
   public String getName() {
     return name;
@@ -59,5 +62,13 @@ public class RegisterRequest {
 
   public void setPhone(String phone) {
     this.phone = phone;
+  }
+
+  public UserRole getRequestedRole() {
+    return requestedRole;
+  }
+
+  public void setRequestedRole(UserRole requestedRole) {
+    this.requestedRole = requestedRole;
   }
 }

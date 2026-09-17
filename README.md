@@ -49,13 +49,20 @@ routing, discovery and any cross-cutting gateway config stay in one place.
 
 CityFix supports exactly three roles: `USER`, `ADMIN`, and `SUPER_ADMIN`.
 
-- A single `SUPER_ADMIN` is pre-seeded by `user-service` when its database is initialized. Use
-  `superadmin@cityfix.com` with password `SuperAdmin@123` to log in. The seed is idempotent, so
-  subsequent application starts preserve that same account rather than creating another one.
-- Public registration always persists `role: USER`; the registration payload has no role field.
-- `SUPER_ADMIN` is the only role allowed to create `ADMIN` accounts. There is no endpoint or
-  public workflow to create a `SUPER_ADMIN`, which preserves the single pre-seeded
-  `SUPER_ADMIN` account.
+- No user account, including a `SUPER_ADMIN`, is pre-seeded at application startup.
+- Public `POST /api/v1/auth/register` accepts an optional `requestedRole`: `USER`, `ADMIN`, or
+  `SUPER_ADMIN`. Omitted `requestedRole` defaults to `USER`.
+- A `USER` registration creates an `ACTIVE` `USER` account and can log in immediately. An
+  `ADMIN` registration creates a `PENDING` `ADMIN` account without a JWT, which cannot log in
+  until approved.
+- A `SUPER_ADMIN` registration creates an `ACTIVE` `SUPER_ADMIN` only when no super admin exists.
+  A second request is rejected with `A Super Admin already exists for this system`. The check and
+  create operation runs in a serializable transaction, so concurrent requests cannot create two
+  super admins.
+- `SUPER_ADMIN` can also use the protected Create Admin endpoint to create an immediately active
+  `ADMIN`. There is no endpoint that creates a `SUPER_ADMIN`.
+- Only `SUPER_ADMIN` can approve or reject pending admin registrations and deactivate a regular
+  `ADMIN`. A regular `ADMIN` can deactivate only `USER` accounts.
 - All protected routes enforce authorization in the backend from the JWT role. `ADMIN` routes
   also allow `SUPER_ADMIN`; `SUPER_ADMIN-ONLY` routes reject both `ADMIN` and `USER` with
   `403 Forbidden`.
@@ -92,11 +99,37 @@ Response (`201 Created`):
 }
 ```
 
+### Public registration and admin approval
+
+`POST /user-service/api/v1/auth/register` accepts the normal registration details plus optional
+`requestedRole`. Use `USER` (or omit it) for an immediately active resident account. A request for
+`ADMIN` creates a `PENDING` admin account without a JWT. A request for `SUPER_ADMIN` is allowed only if no
+super-admin account exists; this is the only public path to establish the one system super admin.
+
+```json
+{
+  "name": "Administrator Applicant",
+  "email": "admin.applicant@cityfix.com",
+  "password": "Password123",
+  "requestedRole": "ADMIN"
+}
+```
+
+Pending-admin management requires an `Authorization: Bearer <super-admin-jwt>` header:
+
+- `GET /user-service/api/v1/users/admins/pending` — lists paginated pending `ADMIN` accounts.
+- `PUT /user-service/api/v1/users/admins/{id}/approve` — changes a pending admin to `ACTIVE`.
+- `PUT /user-service/api/v1/users/admins/{id}/reject` — changes a pending admin to `REJECTED`.
+
+All three endpoints are **SUPER_ADMIN-ONLY**; `USER` and regular `ADMIN` callers receive
+`403 Forbidden`. An approved administrator can log in; a pending account receives `Account pending
+Super Admin approval.` and a rejected account receives `Your admin registration was rejected.`
+
 ### Login role response
 
-`POST /user-service/api/v1/auth/login` is the single login flow for all roles. Its successful
-response includes `user.role` with the exact value `USER`, `ADMIN`, or `SUPER_ADMIN`, allowing
-the frontend to direct the account to the appropriate experience.
+`POST /user-service/api/v1/auth/login` is the single login flow for all roles. An `ACTIVE` account's
+successful response includes `user.role` with the exact value `USER`, `ADMIN`, or `SUPER_ADMIN`,
+allowing the frontend to direct the account to the appropriate experience.
 
 ## API authorization
 
@@ -106,9 +139,12 @@ valid authenticated account (and is also usable by elevated roles); `ADMIN` mean
 
 | Service | Endpoint | Access |
 | --- | --- | --- |
-| User | `POST /api/v1/auth/register` | **PUBLIC** — always creates `USER` |
-| User | `POST /api/v1/auth/login` | **PUBLIC** |
-| User | `POST /api/v1/users/admins` | **SUPER_ADMIN-ONLY** |
+| User | `POST /api/v1/auth/register` | **PUBLIC** — `USER` (default) is `ACTIVE`; `ADMIN` is `PENDING`; `SUPER_ADMIN` is allowed only if one does not already exist |
+| User | `POST /api/v1/auth/login` | **PUBLIC** — only `ACTIVE` accounts can log in |
+| User | `POST /api/v1/users/admins` | **SUPER_ADMIN-ONLY** — creates an active `ADMIN` |
+| User | `GET /api/v1/users/admins/pending` | **SUPER_ADMIN-ONLY** |
+| User | `PUT /api/v1/users/admins/{id}/approve` | **SUPER_ADMIN-ONLY** |
+| User | `PUT /api/v1/users/admins/{id}/reject` | **SUPER_ADMIN-ONLY** |
 | User | `GET /api/v1/users` | **ADMIN** |
 | User | `GET /api/v1/users/{id}` | **ADMIN** |
 | User | `PUT /api/v1/users/{id}/deactivate` | **ADMIN** for `USER` targets; **SUPER_ADMIN-ONLY** for `ADMIN` targets; `SUPER_ADMIN` targets cannot be deactivated |

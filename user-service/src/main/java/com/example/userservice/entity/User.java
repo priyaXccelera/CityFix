@@ -31,6 +31,10 @@ public class User {
   @Column(nullable = false)
   private boolean active = true;
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, columnDefinition = "varchar(20) default 'ACTIVE'")
+  private AccountStatus status = AccountStatus.ACTIVE;
+
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -96,6 +100,14 @@ public class User {
 
   public void setActive(boolean active) {
     this.active = active;
+  }
+
+  public AccountStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(AccountStatus status) {
+    this.status = status;
   }
 
   public LocalDateTime getCreatedAt() {

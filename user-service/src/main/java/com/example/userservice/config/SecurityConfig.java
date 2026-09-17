@@ -42,7 +42,7 @@ public class SecurityConfig {
                         "/swagger-ui/**",
                         "/v3/api-docs/**")
                     .permitAll()
-                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/users/admins")
+                    .requestMatchers("/api/v1/users/admins", "/api/v1/users/admins/**")
                     .hasRole("SUPER_ADMIN")
                     .requestMatchers("/api/v1/users/**")
                     .hasAnyRole("ADMIN", "SUPER_ADMIN")

@@ -1,5 +1,6 @@
 package com.example.userservice.dto;
 
+import com.example.userservice.entity.AccountStatus;
 import com.example.userservice.entity.User;
 import com.example.userservice.entity.UserRole;
 
@@ -12,6 +13,7 @@ public class UserResponse {
   private String address;
   private String phone;
   private boolean active;
+  private AccountStatus status;
 
   public static UserResponse from(User u) {
     UserResponse r = new UserResponse();
@@ -22,6 +24,7 @@ public class UserResponse {
     r.address = u.getAddress();
     r.phone = u.getPhone();
     r.active = u.isActive();
+    r.status = u.getStatus();
     return r;
   }
 
@@ -79,5 +82,13 @@ public class UserResponse {
 
   public void setActive(boolean active) {
     this.active = active;
+  }
+
+  public AccountStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(AccountStatus status) {
+    this.status = status;
   }
 }

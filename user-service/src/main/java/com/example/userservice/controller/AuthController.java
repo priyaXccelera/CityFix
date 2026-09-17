@@ -22,7 +22,7 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  @Operation(summary = "PUBLIC: Register a new USER and receive a JWT")
+  @Operation(summary = "PUBLIC: Register with requestedRole USER, ADMIN, or SUPER_ADMIN; ADMIN requires approval and only one SUPER_ADMIN is allowed")
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
     return ResponseEntity.ok(authService.register(request));
   }

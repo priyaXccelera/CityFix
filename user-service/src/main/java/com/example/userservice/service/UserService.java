@@ -2,6 +2,7 @@ package com.example.userservice.service;
 
 import com.example.userservice.dto.CreateAdminRequest;
 import com.example.userservice.dto.UserResponse;
+import com.example.userservice.entity.AccountStatus;
 import com.example.userservice.entity.User;
 import com.example.userservice.entity.UserRole;
 import com.example.userservice.exception.BadRequestException;
@@ -35,6 +36,7 @@ public class UserService {
     user.setPassword(passwordEncoder.encode(request.getPassword()));
     user.setRole(UserRole.ADMIN);
     user.setActive(true);
+    user.setStatus(AccountStatus.ACTIVE);
     return UserResponse.from(userRepository.save(user));
   }
 
@@ -48,6 +50,33 @@ public class UserService {
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
     return UserResponse.from(user);
+  }
+
+  public Page<UserResponse> listPendingAdmins(Pageable pageable) {
+    return userRepository
+        .findByRoleAndStatus(UserRole.ADMIN, AccountStatus.PENDING, pageable)
+        .map(UserResponse::from);
+  }
+
+  public UserResponse approvePendingAdmin(Long id) {
+    return updatePendingAdminStatus(id, AccountStatus.ACTIVE);
+  }
+
+  public UserResponse rejectPendingAdmin(Long id) {
+    return updatePendingAdminStatus(id, AccountStatus.REJECTED);
+  }
+
+  private UserResponse updatePendingAdminStatus(Long id, AccountStatus status) {
+    User user =
+        userRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+    if (user.getRole() != UserRole.ADMIN || user.getStatus() != AccountStatus.PENDING) {
+      throw new BadRequestException("User is not a pending ADMIN account: " + id);
+    }
+    user.setStatus(status);
+    user.setActive(status == AccountStatus.ACTIVE);
+    return UserResponse.from(userRepository.save(user));
   }
 
   public UserResponse deactivateUser(Long id, boolean isSuperAdmin) {

@@ -1,5 +1,6 @@
 package com.example.userservice.security;
 
+import com.example.userservice.entity.AccountStatus;
 import com.example.userservice.entity.User;
 import com.example.userservice.repository.UserRepository;
 import java.util.List;
@@ -25,8 +26,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             .findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-    if (!user.isActive()) {
-      throw new UsernameNotFoundException("User account is deactivated: " + email);
+    if (!user.isActive() || user.getStatus() != AccountStatus.ACTIVE) {
+      throw new UsernameNotFoundException("User account is not active: " + email);
     }
 
     return new org.springframework.security.core.userdetails.User(
